@@ -7,14 +7,15 @@ const TOR_PROXY = 'socks5://127.0.0.1:9050'; // Tor SOCKS5 proxy
 // Function to signal Tor for a new circuit (NEWNYM)
 function renewTorIdentity() {
   return new Promise((resolve, reject) => {
-    const socket = net.connect({ port: TOR_CONTROL_PORT }, () => {
+    // Explicitly set host to 127.0.0.1 to use IPv4
+    const socket = net.connect({ host: '127.0.0.1', port: TOR_CONTROL_PORT }, () => {
       // Authenticate with an empty string (CookieAuthentication is disabled)
       socket.write('AUTHENTICATE ""\r\n');
     });
     let response = '';
     socket.on('data', (chunk) => {
       response += chunk.toString();
-      // Once we get the authentication confirmation, send NEWNYM signal
+      // Once we get a "250 OK", send the NEWNYM signal
       if (response.includes('250 OK')) {
         socket.write('signal NEWNYM\r\n');
       }
@@ -40,7 +41,6 @@ async function runCycle() {
         '--disable-setuid-sandbox',
         `--proxy-server=${TOR_PROXY}`
       ],
-      // Optionally, you can specify the executablePath via an env variable
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
 
@@ -52,7 +52,7 @@ async function runCycle() {
     );
 
     console.log('Page loaded. Waiting for 3 minutes...');
-    await new Promise(resolve => setTimeout(resolve, 180000)); // 3 minutes wait
+    await new Promise(resolve => setTimeout(resolve, 180000)); // Wait for 3 minutes
 
     await browser.close();
     console.log('Cycle complete.');
