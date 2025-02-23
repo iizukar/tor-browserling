@@ -17,6 +17,9 @@ COPY torrc /etc/tor/torrc
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
+# Create working directory and change ownership so that the node user can write there
+RUN mkdir -p /app && chown -R node:node /app
+
 # Switch back to non-root (the official image uses 'node')
 USER node
 
