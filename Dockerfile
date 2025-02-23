@@ -4,7 +4,7 @@ FROM ghcr.io/puppeteer/puppeteer:19.7.2
 # Switch to root to perform installation and cleanup
 USER root
 
-# Remove conflicting Google repository files that cause GPG errors
+# Remove conflicting Google repository files causing GPG errors
 RUN rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google.list
 
 # Update package list and install Tor
@@ -26,9 +26,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package files and install dependencies using npm install
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy the rest of your application code
 COPY . .
