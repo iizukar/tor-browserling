@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const net = require('net');
+const http = require('http');
 
 const TOR_CONTROL_PORT = 9051; // Tor's control port
 const TOR_PROXY = 'socks5://127.0.0.1:9050'; // Tor SOCKS5 proxy
@@ -7,15 +8,15 @@ const TOR_PROXY = 'socks5://127.0.0.1:9050'; // Tor SOCKS5 proxy
 // Function to signal Tor for a new circuit (NEWNYM)
 function renewTorIdentity() {
   return new Promise((resolve, reject) => {
-    // Explicitly set host to 127.0.0.1 to use IPv4
+    // Connect explicitly using IPv4
     const socket = net.connect({ host: '127.0.0.1', port: TOR_CONTROL_PORT }, () => {
-      // Authenticate with an empty string (CookieAuthentication is disabled)
+      // Authenticate with an empty string since CookieAuthentication is disabled
       socket.write('AUTHENTICATE ""\r\n');
     });
     let response = '';
     socket.on('data', (chunk) => {
       response += chunk.toString();
-      // Once we get a "250 OK", send the NEWNYM signal
+      // When we get authentication confirmation, send NEWNYM command
       if (response.includes('250 OK')) {
         socket.write('signal NEWNYM\r\n');
       }
@@ -52,7 +53,7 @@ async function runCycle() {
     );
 
     console.log('Page loaded. Waiting for 3 minutes...');
-    await new Promise(resolve => setTimeout(resolve, 180000)); // Wait for 3 minutes
+    await new Promise(resolve => setTimeout(resolve, 180000)); // 3 minutes wait
 
     await browser.close();
     console.log('Cycle complete.');
@@ -61,10 +62,21 @@ async function runCycle() {
   }
 }
 
-async function main() {
+async function startScraperLoop() {
   while (true) {
     await runCycle();
   }
 }
 
-main();
+// Start the scraper loop (in the background)
+startScraperLoop();
+
+// Create a minimal HTTP server to satisfy Render's port binding requirement
+const port = process.env.PORT || 3000;
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {"Content-Type": "text/plain"});
+  res.end("Service is running.\n");
+});
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening on port ${port}`);
+});
