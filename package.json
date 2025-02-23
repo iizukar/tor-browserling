@@ -1,0 +1,17 @@
+{
+  "name": "puppeteer-tor-scraper",
+  "version": "1.0.0",
+  "description": "A Node.js app that renews Tor identity and scrapes a target URL using Puppeteer and Tor.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^19.7.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
