@@ -8,13 +8,13 @@ const TOR_PROXY = 'socks5://127.0.0.1:9050'; // Tor SOCKS5 proxy
 function renewTorIdentity() {
   return new Promise((resolve, reject) => {
     const socket = net.connect({ port: TOR_CONTROL_PORT }, () => {
-      // Authenticate with an empty string since CookieAuthentication is disabled
+      // Authenticate with an empty string (CookieAuthentication is disabled)
       socket.write('AUTHENTICATE ""\r\n');
     });
     let response = '';
     socket.on('data', (chunk) => {
       response += chunk.toString();
-      // Wait for successful authentication message then send NEWNYM signal
+      // Once we get the authentication confirmation, send NEWNYM signal
       if (response.includes('250 OK')) {
         socket.write('signal NEWNYM\r\n');
       }
@@ -40,7 +40,7 @@ async function runCycle() {
         '--disable-setuid-sandbox',
         `--proxy-server=${TOR_PROXY}`
       ],
-      // If needed, specify the executablePath via environment variable
+      // Optionally, you can specify the executablePath via an env variable
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
 
