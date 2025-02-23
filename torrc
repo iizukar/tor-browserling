@@ -1,0 +1,4 @@
+# torrc
+CookieAuthentication 0
+ControlPort 9051
+SocksPort 9050
