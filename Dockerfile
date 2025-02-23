@@ -36,5 +36,5 @@ RUN npm install
 # Copy the rest of your application code
 COPY . .
 
-# Use the entrypoint script to start Tor and your Node.js app automatically.
-CMD ["/app/entrypoint.sh"]
+# Use bash to run the entrypoint script explicitly
+CMD ["/bin/bash", "/app/entrypoint.sh"]
